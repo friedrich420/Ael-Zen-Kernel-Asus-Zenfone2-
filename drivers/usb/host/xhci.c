@@ -434,16 +434,16 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 
 #else
 
-static inline int xhci_try_enable_msi(struct usb_hcd *hcd)
+static int xhci_try_enable_msi(struct usb_hcd *hcd)
 {
 	return 0;
 }
 
-static inline void xhci_cleanup_msix(struct xhci_hcd *xhci)
+static void xhci_cleanup_msix(struct xhci_hcd *xhci)
 {
 }
 
-static inline void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
+static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 {
 }
 
@@ -1017,7 +1017,7 @@ int xhci_suspend(struct xhci_hcd *xhci)
  */
 int xhci_resume(struct xhci_hcd *xhci, bool hibernated)
 {
-	u32			command, temp = 0, status;
+	u32			command, temp = 0;
 	struct usb_hcd		*hcd = xhci_to_hcd(xhci);
 	struct usb_hcd		*secondary_hcd;
 	int			retval = 0;
@@ -1141,12 +1141,8 @@ int xhci_resume(struct xhci_hcd *xhci, bool hibernated)
 
  done:
 	if (retval == 0) {
-		/* Resume root hubs only when have pending events. */
-		status = readl(&xhci->op_regs->status);
-		if (status & STS_EINT) {
-			usb_hcd_resume_root_hub(hcd);
-			usb_hcd_resume_root_hub(xhci->shared_hcd);
-		}
+		usb_hcd_resume_root_hub(hcd);
+		usb_hcd_resume_root_hub(xhci->shared_hcd);
 	}
 
 	/*
@@ -3422,9 +3418,6 @@ int xhci_discover_or_reset_device(struct usb_hcd *hcd, struct usb_device *udev)
 		else
 			return -EINVAL;
 	}
-
-	if (virt_dev->tt_info)
-		old_active_eps = virt_dev->tt_info->active_eps;
 
 	if (virt_dev->udev != udev) {
 		/* If the virt_dev and the udev does not match, this virt_dev
