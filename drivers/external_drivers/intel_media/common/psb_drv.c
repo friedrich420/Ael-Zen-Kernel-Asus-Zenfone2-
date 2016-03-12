@@ -1942,11 +1942,7 @@ static int psb_driver_load(struct drm_device *dev, unsigned long chipset)
 	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
 		drm_irq_install(dev);
 		if (IS_CTP(dev)) {
-			if (irq_set_affinity(drm_dev_to_irq(dev),
-					cpumask_of(0)))
-				pr_err("psb_drv: set irq affinity failed\n");
-			else
-				pr_info("psb_drv: set irq affnity to CPU0\n");
+			pr_info("psb_drv: set irq affnity to CPU0\n");
 		}
 	}
 
